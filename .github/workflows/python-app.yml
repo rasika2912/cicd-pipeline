@@ -111,40 +111,42 @@
 #          ls -al  # Check files
 #          aws s3 sync . s3://cicd-new --delete --exclude ".git/*" --exclude ".github/*"
 
-name: Run Pytest and Upload Results to S3
+
+name: Run Python Tests and Upload to S3
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
   test-and-upload:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v2
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v2
       with:
         python-version: '3.10'
 
-    - name: Install Dependencies
+    - name: Install dependencies
       run: |
+        python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install pytest boto3 awscli
 
-    - name: Run Pytest and Save Output
+    - name: Run tests
       run: |
-        pytest tests/test_main.py > test_output.txt
+        pytest cicd-pipeline/tests/test_main.py
 
-    - name: Upload Test Output to S3
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_REGION: ap-south-1
-        BUCKET_NAME: cicd-new
+    - name: Configure AWS CLI
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ap-south-1
+
+    - name: Upload file to S3
       run: |
-        aws s3 cp test_output.txt s3://cicd-new/test_results/test_output.txt
+        aws s3 cp cicd-pipeline/tests/test_main.py s3://cicd-new/cicd-pipeline/tests/test_main.py
