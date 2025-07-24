@@ -51,7 +51,7 @@
 #          echo "Starting deployment..."
 #          # Replace this echo with actual deployment commands, for example:
 #          # ssh user@your-server "cd /path/to/project && git pull && systemctl restart your-service"
-name: Python CI/CD with S3 Deployment
+name: cicd-pipeline
 
 on:
   push:
@@ -103,9 +103,11 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-south-1
+          aws-region: eu-north-1
 
       - name: Upload to S3
         run: |
           echo "Uploading files to S3..."
-          aws s3 sync . s3://cicd-new --delete
+          ls -al  # Check files
+          aws s3 sync . s3://cicd-new --delete --exclude ".git/*" --exclude ".github/*"
+
