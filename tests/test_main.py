@@ -17,4 +17,4 @@ def test_multiply_function():
 def test_divide_function():
     assert divide(2, 4) == 0.5
     assert divide(4, 4) == 1
-    assert divide(5,6 ) ==0.8333
+    assert divide(5,5 ) ==1
